@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图书列表</title>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <style type="text/css">
+        table thead tr th, table tbody tr td {
+            text-align: center;
+        }
+
+        td a {
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        #optionDiv {
+            margin: 24px 0px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="text-center">图书列表</h2>
+    <div id="optionDiv">
+        <a class="btn btn-info" href="add_book.html">添加图书信息</a>
+    </div>
+    <div>
+        <input placeholder="请输入图书名称" id="txtSearchTitle">
+        <button type="button" id="btnSearch">搜索</button>
+    </div>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>图书编号</th>
+            <th>图书名称</th>
+            <th>图书封面</th>
+            <th>图书类别</th>
+            <th>图书作者</th>
+            <th>出版社</th>
+            <th>出版日期</th>
+            <th>价钱</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+    <div>
+        共<span id="countSpan">13</span>条数据，<span id="pageSpan">1/3</span>页
+    </div>
+    <div class="btn-group">
+        <button type="button" id="btnFirst" class="btn btn-default">首页</button>
+        <button type="button" id="btnPrev" class="btn btn-default">上一页</button>
+        <button type="button" id="btnNext" class="btn btn-default">下一页</button>
+        <button type="button" id="btnLast" class="btn btn-default">末页</button>
+    </div>
+
+</div>
+</body>
+<script type="text/javascript" src="js/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="js/layer/layer.js"></script>
+<script type="text/javascript">
+    var currpage = 1;
+    var lastPage = 1;
+    $(function () {
+        queryAllBook('');
+
+        $('#btnFirst').attr('disabled', 'disabled');
+        $('#btnPrev').attr('disabled', 'disabled');
+
+        $('#btnSearch').click(function () {
+            queryAllBook($('#txtSearchTitle').val());
+        })
+
+        $('#btnNext').click(function () {
+            currpage = currpage + 1;
+            if (currpage > lastPage) {
+                currpage = lastPage;
+            }
+            queryAllBook($('#txtSearchTitle').val());
+            $('#btnFirst').removeAttr('disabled')
+            $('#btnPrev').removeAttr('disabled')
+        })
+        $('#btnPrev').click(function () {
+            currpage = currpage - 1;
+            if (currpage < 1) {
+                currpage = 1;
+            }
+            queryAllBook($('#txtSearchTitle').val());
+        })
+
+        $('#btnLast').click(function () {
+            currpage = lastPage;
+            queryAllBook($('#txtSearchTitle').val());
+        })
+        $('#btnFirst').click(function () {
+            currpage = 1;
+            queryAllBook($('#txtSearchTitle').val());
+        })
+    })
+
+    function delBook(bid, obj) {
+        layer.confirm('是否要删除该图书信息', {icon: 3, title: '删除提示'}, function (index) {
+            $.post('delBook.do', {bid: bid}, function (data) {
+                if (data.code = 200) {
+                    layer.msg(data.msg, {icon: 1, time: 2000}, function () {
+                        $(obj).parent().parent().remove();
+                    });
+                } else {
+                    layer.msg(data.msg);
+                }
+            }, "json");
+
+            layer.close(index);
+        });
+    }
+
+
+    function queryAllBook(word) {
+        $('tbody').empty();
+        $.get('queryAllBook.do', {currPage: currpage, title: word}, function (data) {
+            console.log(data);
+
+            if (data.code == 200) {
+                lastPage = data.page.pageCount;
+                $('#countSpan').text(data.page.recordCount);
+                $('#pageSpan').text(data.page.currPage + '/' + data.page.pageCount);
+                $.each(data.result, function (index, obj) {
+                    //console.log(obj.title, obj.author, obj.publisher, obj.pubdate, obj.price, obj.summary);
+                    var tr = $('<tr></tr>');
+                    var td1 = $('<td></td>').text(obj.bid);
+                    var td2 = $('<td></td>').text(obj.title);
+                    var td3 = $('<td></td>').text(obj.author);
+                    var td4 = $('<td></td>').text(obj.publisher);
+                    var td5 = $('<td></td>').text(obj.pubdate);
+                    var td6 = $('<td></td>').text(obj.price);
+                    var td7 = $('<td></td>').text(obj.tname);
+                    var td9 = $('<td></td>');
+                    var img = $('<img width="100">').attr('src', 'http://localhost:8080/Library' + obj.cover);
+                    td9.append(img);
+                    var td8 = $('<td></td>');
+                    var editA = $('<a onclick="editBook(' + obj.bid + ')"></a>').html('编辑');
+                    var span = $('<span></span>').html("&nbsp;&nbsp;&nbsp;&nbsp;")
+                    var delA = $('<a onclick="delBook(' + obj.bid + ',this)"></a>').text('删除');
+                    td8.append(editA).append(span).append(delA);
+                    tr.append(td1).append(td2).append(td9).append(td7).append(td3).append(td4).append(td5).append(td6).append(td8);
+                    $('tbody').append(tr);
+                })
+            } else {
+                layer.msg(data.msg);
+            }
+        }, "json");
+    }
+
+    function editBook(bid) {
+        location.href = "edit_book.html?bid=" + bid;
+    }
+
+</script>
+</html>

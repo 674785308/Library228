@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>添加图书</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+</head>
+<body>
+<div class="container">
+    <h2 class="text-center">添加图书信息</h2>
+    <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label for="txtTitle" class="col-md-2 control-label">图书名称</label>
+            <div class="col-md-9">
+                <input type="text" id="txtTitle" class="form-control" placeholder="请输入图书名称">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="txtTitle" class="col-md-2 control-label">图书类别</label>
+            <div class="col-md-9">
+                <!-- <input type="text" id="txtType" class="form-control" placeholder="请输入图书名称">-->
+                <select id="txtType" class="form-control">
+
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="txtAuthor" class="col-md-2 control-label">图书作者</label>
+            <div class="col-md-9">
+                <input type="text" id="txtAuthor" class="form-control" placeholder="请输入图书作者">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="txtPublisher" class="col-md-2 control-label">图书出版社</label>
+            <div class="col-md-9">
+                <input type="text" id="txtPublisher" class="form-control" placeholder="请输入图书出版社">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="txtPubdate" class="col-md-2 control-label">出版日期</label>
+            <div class="col-md-9">
+                <input type="text" id="txtPubdate" class="form-control" placeholder="请输入出版日期">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="txtPrice" class="col-md-2 control-label">图书单价</label>
+            <div class="col-md-9">
+                <input type="text" id="txtPrice" class="form-control" placeholder="请输入图书单价">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="txtPrice" class="col-md-2 control-label">图书封面</label>
+            <div class="col-md-9">
+                <input type="file" id="txtCover" class="form-control" accept="image/*">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-9 col-md-offset-2">
+                <img class="" id="imgCover" width="150px">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="txtSummary" class="col-md-2 control-label">图书简介</label>
+            <div class="col-md-9">
+                <!--<input type="text" class="form-control" placeholder="请输入图书名称">-->
+                <textarea id="txtSummary" style="resize: none;height: 150px" class="form-control"
+                          placeholder="请输入图书简介"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <!-- <label for="txtSummary" class="col-md-2 control-label">图书简介</label>-->
+            <div class="col-md-9 col-md-offset-2">
+                <!--<input type="text" class="form-control" placeholder="请输入图书名称">-->
+                <button type="button" id="btnAddBook" class="btn btn-default">保存图书</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script type="text/javascript" src="js/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="js/layer/layer.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+
+        $.getJSON("queryAllType.do", function (data) {
+            if (data.code == 200) {
+                $.each(data.result, function (index, obj) {
+                    var option = $('<option></option>');
+                    option.val(obj.tid);
+                    option.text(obj.tname);
+                    $('#txtType').append(option);
+                })
+            }
+        })
+
+
+        $('#btnAddBook').click(function () {
+            //注意，使用ajax上传文件，data必须要是FormData类型
+            //创建FormData对象
+            var formDate = new FormData();
+            formDate.append("title", $('#txtTitle').val());
+            formDate.append("author", $('#txtAuthor').val());
+            formDate.append("price", $('#txtPrice').val());
+            formDate.append('tid', $('#txtType').val());
+            //formDate.append('cover',$('#txtCover').get(0).files[0]);
+            formDate.append('cover', $('#txtCover')[0].files[0]);
+            formDate.append("publisher", $('#txtPublisher').val());
+            formDate.append("pubdate", $('#txtPubdate').val());
+            formDate.append("summary", $('#txtSummary').val());
+
+            //console.log(formDate)
+
+            $.ajax({
+                url: 'addBook.do',
+                data: formDate,
+                dataType: "JSON",
+                type: "POST",
+                processData: false,//使数据不做处理
+                contentType: false//不设置content-type
+            }).done(function (data) {
+                console.log(data);
+                if (data.code == 200) {
+                    layer.msg(data.msg, {icon: 1, time: 2000}, function () {
+                        location.href = "book_list.html";
+                    })
+                } else {
+                    layer.msg(data.msg);
+                }
+            }).fail(function () {
+
+            })
+        })
+
+
+        $('#txtCover').change(function () {
+            var file = this.files[0];
+            //console.log(file);
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                //console.log(e.target.result);
+                $('#imgCover').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(file);
+        })
+
+    })
+</script>
+</html>

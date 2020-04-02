@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>登录</title>
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+
+<body>
+<div class="lowin">
+    <div class="lowin-brand">
+        <img src="img/kodinger.jpg" alt="logo">
+    </div>
+    <div class="lowin-wrapper">
+        <div class="lowin-box lowin-login">
+            <div class="lowin-box-inner">
+                <form>
+                    <div class="lowin-group">
+                        <label>账号</label>
+                        <input id="txtAccount" value="admin" type="text" autocomplete="email" name="email" class="lowin-input">
+                    </div>
+                    <div class="lowin-group password-group">
+                        <label>密码</label>
+                        <input id="txtPassword" value="123456" type="password" name="password" autocomplete="current-password"
+                               class="lowin-input">
+                    </div>
+                    <button type="button" class="lowin-btn login-btn" id="btnLogin">
+                        登&nbsp;&nbsp;录
+                    </button>
+
+                </form>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+</div>
+
+<script src="js/auth.js"></script>
+<script src="js/jquery-3.2.1.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/layer/layer.js"></script>
+<script>
+    /*Auth.init({
+        login_url: '#login',
+        forgot_url: '#forgot'
+    });*/
+    $(function () {
+        $('#btnLogin').click(function () {
+            if ($('#txtAccount').val() == '' || $('#txtPassword').val() == '') {
+                layer.msg("请输入完整信息");
+                return;
+            }
+            $.post('login.do', {
+                account: $('#txtAccount').val(),
+                password: $('#txtPassword').val()
+            }, function (data) {
+                //console.log(data);
+                if (data.code == 200) {
+                    layer.msg(data.msg, {icon: 1, time: 1000}, function () {
+                        location.href = "book_list.html";
+                    })
+                } else {
+                    layer.msg(data.msg);
+                }
+            }, "json");
+        })
+    })
+</script>
+</body>
+</html>

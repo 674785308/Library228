@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑学生信息</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+</head>
+<body>
+<div class="container">
+    <h2 class="text-center">编辑图书信息</h2>
+    <form class="form-horizontal" role="form">
+        <input type="hidden" id="txtBid">
+        <div class="form-group">
+            <label for="txtTitle" class="col-md-2 control-label">图书名称</label>
+            <div class="col-md-9">
+                <input type="text" id="txtTitle" class="form-control" placeholder="请输入图书名称">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="txtTitle" class="col-md-2 control-label">图书类别</label>
+            <div class="col-md-9">
+                <!-- <input type="text" id="txtType" class="form-control" placeholder="请输入图书名称">-->
+                <select id="txtType" class="form-control">
+                    <option value="1">天文类</option>
+                    <option value="2">文学类</option>
+                    <option value="3">地理类</option>
+                    <option value="4">历史类</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="txtAuthor" class="col-md-2 control-label">图书作者</label>
+            <div class="col-md-9">
+                <input type="text" id="txtAuthor" class="form-control" placeholder="请输入图书作者">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="txtPublisher" class="col-md-2 control-label">图书出版社</label>
+            <div class="col-md-9">
+                <input type="text" id="txtPublisher" class="form-control" placeholder="请输入图书出版社">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="txtPubdate" class="col-md-2 control-label">出版日期</label>
+            <div class="col-md-9">
+                <input type="text" id="txtPubdate" class="form-control" placeholder="请输入出版日期">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="txtPrice" class="col-md-2 control-label">图书单价</label>
+            <div class="col-md-9">
+                <input type="text" id="txtPrice" class="form-control" placeholder="请输入图书单价">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="txtSummary" class="col-md-2 control-label">图书简介</label>
+            <div class="col-md-9">
+                <!--<input type="text" class="form-control" placeholder="请输入图书名称">-->
+                <textarea id="txtSummary" style="resize: none;height: 150px" class="form-control"
+                          placeholder="请输入图书简介"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <!-- <label for="txtSummary" class="col-md-2 control-label">图书简介</label>-->
+            <div class="col-md-9 col-md-offset-2">
+                <!--<input type="text" class="form-control" placeholder="请输入图书名称">-->
+                <button type="button" id="btnEditBook" class="btn btn-default">保存修改</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script type="text/javascript" src="js/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="js/layer/layer.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        var url = location.href;
+        console.log(url)
+        var id = url.split("=")[1];
+        console.log(id);
+        $.getJSON('queryBookById.do', {bid: id}, function (data) {
+            //console.log(data);
+            if (data.code == 200) {
+                $('#txtBid').val(data.result.bid);
+                $('#txtTitle').val(data.result.title);
+                $('#txtAuthor').val(data.result.author);
+                $('#txtPrice').val(data.result.price);
+                $('#txtPubdate').val(data.result.pubdate);
+                $('#txtPublisher').val(data.result.publisher);
+                $('#txtSummary').val(data.result.summary);
+                $('#txtType').val(data.result.tid);
+            }
+        });
+        $('#btnEditBook').click(function () {
+            $.ajax({
+                url: 'updateBook.do',
+                data: {
+                    bid: $('#txtBid').val(),
+                    title: $('#txtTitle').val(),
+                    author: $('#txtAuthor').val(),
+                    publisher: $('#txtPublisher').val(),
+                    pubdate: $('#txtPubdate').val(),
+                    price: $.trim($('#txtPrice').val()),
+                    summary: $('#txtSummary').val(),
+                    tid:$('#txtType').val()
+                },
+                dataType: 'json',
+                type: 'post',
+                success: function (data) {
+                    if (data.code == 200) {
+                        layer.msg(data.msg, {icon: 1, time: 2000}, function () {
+                            location.href = "book_list.html";
+                        })
+                    } else {
+                        layer.msg(data.msg);
+                    }
+                }
+            })
+        })
+    })
+</script>
+</html>
